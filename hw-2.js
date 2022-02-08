@@ -1,9 +1,7 @@
 Array.prototype.includesCi = function (sItem) {
-	const tempArr = this.filter(
-		(item) => item.toLowerCase() === sItem.toLowerCase()
-	);
-
-	return tempArr.length ? true : false;
+	return this.find((item) => item.toLowerCase() === sItem.toLowerCase())
+		? true
+		: false;
 };
 
 // ORNEK 1
