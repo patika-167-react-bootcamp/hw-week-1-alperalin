@@ -51,12 +51,14 @@ function moveOrCopyFile(type = 'move', fileID, folderID) {
 	if (receiverFolderIndex === -1)
 		return `${folderID}, ID numarasi ile tanimlanmis bir klasor bulunmuyor`;
 
-	// Tasinacak file'in folder ID'si aliniyor
+	// Tasinacak dosyanin, klasor indeksi aliniyor
 	const folderIndex = findFolderIndex(fileID);
 
+	// Mevcut klasor ile tasinacak klasor ayniysa hata mesaji donuluyor
 	if (folderIndex === receiverFolderIndex)
 		return `Ayni klasor icerisinde islem yapilamaz`;
 
+	// klasor indeksi -1 degilse islem yapiliyor
 	if (folderIndex !== -1) {
 		// Folder icerisindeki file indeksi aliniyor
 		const fileIndex = findFileIndex(folderIndex, fileID);
@@ -70,17 +72,19 @@ function moveOrCopyFile(type = 'move', fileID, folderID) {
 		const receiverFolder = folders[receiverFolderIndex];
 
 		// Dosya, klasor icerisine gonderiliyor.
+		// Eger klasorde files bulunmuyorsa yeni files olusturuluyor
 		receiverFolder['files']
 			? receiverFolder['files'].push(file[0])
 			: (receiverFolder['files'] = [file[0]]);
 
-		// Islemin tamamlandigina dair return mesaji donuluyor
+		// Islemin tamamlandigina dair mesaji donuluyor
 		return `${fileID} ID numarali dosya, ${
 			receiverFolder.id
 		} ID numarali klasore ${type === 'move' ? 'tasindi' : 'kopyalandi'}.`;
 	}
 
-	// Eger herhangi bir islem yapilamamissa bu file id'nin yanlis oldugunu belirtiyor.
+	// Eger herhangi bir islem yapilamamissa bu file id'nin yanlis
+	// oldugunu belirtiyor ve hata mesaji donuluyor.
 	return `${fileID}, ID numarasi ile tanimlanmis bir dosya bulunmuyor`;
 }
 
