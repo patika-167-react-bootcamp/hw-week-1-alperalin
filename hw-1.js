@@ -46,19 +46,19 @@ function moveOrCopyFile(type = 'move', fileID, folderID) {
 	if (typeof fileID !== 'number' || typeof folderID !== 'number')
 		return 'FileID ve FolderID giriniz';
 
-	// Tasinacak klasorun var olup olmadigi kontrol ediliyor.
+	// Tasima/kopyalama yapilacak klasorun var olup olmadigi kontrol ediliyor.
 	const receiverFolderIndex = folders.findIndex((item) => item.id === folderID);
 	if (receiverFolderIndex === -1)
 		return `${folderID}, ID numarasi ile tanimlanmis bir klasor bulunmuyor`;
 
-	// Tasinacak dosyanin, klasor indeksi aliniyor
+	// Tasima/kopyalama yapilacak dosyanin, klasor indeksi aliniyor
 	const folderIndex = findFolderIndex(fileID);
 
-	// Mevcut klasor ile tasinacak klasor ayniysa hata mesaji donuluyor
+	// Mevcut klasor ile Tasima/kopyalama yapilacak klasor ayniysa hata mesaji donuluyor
 	if (folderIndex === receiverFolderIndex)
 		return `Ayni klasor icerisinde islem yapilamaz`;
 
-	// klasor indeksi -1 degilse islem yapiliyor
+	// Klasor indeksi -1 degilse islem yapiliyor
 	if (folderIndex !== -1) {
 		// Folder icerisindeki file indeksi aliniyor
 		const fileIndex = findFileIndex(folderIndex, fileID);
@@ -105,10 +105,10 @@ function remove(fileID) {
 	// Dogru ID kontrolu yapiliyor
 	if (typeof fileID !== 'number') return 'FileID giriniz';
 
-	// Tasinacak file'in folder indeksi bulunuyor
+	// Silenecek dosyanin bulundugu klasorun indeksi bulunuyor
 	const folderIndex = findFolderIndex(fileID);
 
-	// klasor indeksi -1 degilse islem yapiliyor
+	// Klasor indeksi -1 degilse islem yapiliyor
 	if (folderIndex !== -1) {
 		// Dosya indeksi aliniyor
 		const fileIndex = findFileIndex(folderIndex, fileID);
@@ -130,10 +130,10 @@ function removeFolder(folderID) {
 	// Dogru ID kontrolu yapiliyor
 	if (typeof folderID !== 'number') return 'FolderID giriniz';
 
-	// Klasorun indeksi aliniyor
+	// Silinecek klasorun indeksi aliniyor
 	const folderIndex = folders.findIndex((item) => item.id === folderID);
 
-	// Eger klasor indeksi -1 degilse klasor siliniyor
+	// Klasor indeksi -1 degilse klasor siliniyor
 	if (folderIndex !== -1) {
 		// Klasor siliniyor
 		folders.splice(folderIndex, 1);
@@ -155,7 +155,7 @@ function parentFolderOf(fileID) {
 	// Dosyanin icerisinde oldugu klasorun indeksi aliniyor
 	const folderIndex = findFolderIndex(fileID);
 
-	// Eger klasor indeksi -1 degilse klasorun id'si donuluyor
+	// Klasor indeksi -1 degilse klasorun id'si donuluyor
 	if (folderIndex !== -1) return folders[folderIndex]['id'];
 
 	// Klasor indeksi -1 donerse hata mesaji donuluyor
