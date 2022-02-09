@@ -108,13 +108,19 @@ function remove(fileID) {
 	// Tasinacak file'in folder indeksi bulunuyor
 	const folderIndex = findFolderIndex(fileID);
 
+	// klasor indeksi -1 degilse islem yapiliyor
 	if (folderIndex !== -1) {
+		// Dosya indeksi aliniyor
 		const fileIndex = findFileIndex(folderIndex, fileID);
+
+		// Dosya splice ile klasorden siliniyor
 		folders[folderIndex].files.splice(fileIndex, 1);
 
+		// Islemin tamamlandigina dair mesaji donuluyor
 		return `${fileID} ID numarali dosya silinmistir.`;
 	}
 
+	// Klasor indeksi -1 donerse hata mesaji donuluyor
 	return `${fileID} ID numarasi ile tanimlanmis bir dosya bulunmuyor`;
 }
 console.log(remove(17));
@@ -129,7 +135,10 @@ function removeFolder(folderID) {
 
 	// Eger klasor indeksi -1 degilse klasor siliniyor
 	if (folderIndex !== -1) {
+		// Klasor siliniyor
 		folders.splice(folderIndex, 1);
+
+		// Islemin tamamlandigina dair mesaji donuluyor
 		return `${folderID}, ID numarali klasor silindi.`;
 	}
 
