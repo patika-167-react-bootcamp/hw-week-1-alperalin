@@ -1,4 +1,5 @@
 // NOTE: Folder icinde Folder olmayacak
+// Data
 const folders = [
 	{
 		id: 6,
@@ -22,143 +23,118 @@ const folders = [
 	},
 ];
 
-// Girilen dosyanin icerisinde bulundugu klasorun indeksini bulmak icin kullaniliyor.
-function findFolderIndex(fileID) {
-	const folderIndex = folders.findIndex((item) => {
-		if (item.files && item.files.length > 0) {
-			return item.files.find((file) => file.id === fileID);
-		}
-	});
-	return folderIndex;
-}
+// Ortak kullanilan fonksiyonlar bir Object altina toplandi.
+const utils = {
+	// Verilen ID uzerinden klasorun indeksini doner.
+	getFolderIndex: (folderID) => {
+		return folders.findIndex((item) => item.id === folderID);
+	},
+	// Verilen dosya ID'si uzerinden ebeveyn klasorun ve dosyanin indeksini doner.
+	getParentFolderAndFileIndex: (fileID) => {
+		const parentFolderIndex = folders.findIndex((item) => {
+			if (item.files && item.files.length > 0) {
+				return item.files.find((file) => file.id === fileID);
+			}
+		});
 
-// Girilen dosyanin indeksini bulmak icin kullaniliyor.
-function findFileIndex(folderIndex, fileID) {
-	const fileIndex = folders[folderIndex].files.findIndex(
-		(item) => item.id === fileID
-	);
-	return fileIndex;
-}
+		const fileIndex = folders[parentFolderIndex]
+			? folders[parentFolderIndex].files.findIndex((item) => item.id === fileID)
+			: -1;
+
+		return { parentFolderIndex, fileIndex };
+	},
+};
 
 // Move ve Copy fonksiyonlari %95 ayni islemleri yaptigi icin tek fonksiyon altina toplandi.
 function moveOrCopyFile(type = 'move', fileID, folderID) {
+	// Degiskenler tanimlaniyor ve indeksler aliniyor.
+	const { parentFolderIndex, fileIndex } =
+		utils.getParentFolderAndFileIndex(fileID);
+	const destFolderIndex = utils.getFolderIndex(folderID);
+
 	// Dogru ID kontrolu yapiliyor
-	if (typeof fileID !== 'number' || typeof folderID !== 'number')
-		return 'FileID ve FolderID giriniz';
-
-	// Tasima/kopyalama yapilacak klasorun var olup olmadigi kontrol ediliyor.
-	const receiverFolderIndex = folders.findIndex((item) => item.id === folderID);
-	if (receiverFolderIndex === -1)
-		return `${folderID}, ID numarasi ile tanimlanmis bir klasor bulunmuyor`;
-
-	// Tasima/kopyalama yapilacak dosyanin, klasor indeksi aliniyor
-	const folderIndex = findFolderIndex(fileID);
+	if (fileIndex === -1 || destFolderIndex === -1)
+		return 'Verilen ID numaralari hatali';
 
 	// Mevcut klasor ile Tasima/kopyalama yapilacak klasor ayniysa hata mesaji donuluyor
-	if (folderIndex === receiverFolderIndex)
-		return `Ayni klasor icerisinde islem yapilamaz`;
+	if (parentFolderIndex === destFolderIndex)
+		return 'Ayni klasor icerisinde islem yapilamaz';
 
-	// Klasor indeksi -1 degilse islem yapiliyor
-	if (folderIndex !== -1) {
-		// Folder icerisindeki file indeksi aliniyor
-		const fileIndex = findFileIndex(folderIndex, fileID);
+	// Islemin turune gore splice veya slice kullanilarak dosya aliniyor.
+	const file =
+		type === 'move'
+			? folders[parentFolderIndex].files.splice(fileIndex, 1)
+			: folders[parentFolderIndex].files.slice(fileIndex, fileIndex + 1);
 
-		// Islemin turune gore splice veya slice kullaniliyor.
-		const file = (type = 'move')
-			? folders[folderIndex].files.splice(fileIndex, 1)
-			: folders[folderIndex].files.slice(fileIndex, fileIndex + 1);
+	// Dosya, hedef klasor icerisine gonderiliyor.
+	// Eger klasorde files bulunmuyorsa yeni files olusturuluyor
+	folders[destFolderIndex]['files']
+		? folders[destFolderIndex]['files'].push(file[0])
+		: (folders[destFolderIndex]['files'] = [file[0]]);
 
-		// Tasima/kopyalama yapilacak klasor bir degiskene ataniyor.
-		const receiverFolder = folders[receiverFolderIndex];
-
-		// Dosya, klasor icerisine gonderiliyor.
-		// Eger klasorde files bulunmuyorsa yeni files olusturuluyor
-		receiverFolder['files']
-			? receiverFolder['files'].push(file[0])
-			: (receiverFolder['files'] = [file[0]]);
-
-		// Islemin tamamlandigina dair mesaji donuluyor
-		return `${fileID} ID numarali dosya, ${
-			receiverFolder.id
-		} ID numarali klasore ${type === 'move' ? 'tasindi' : 'kopyalandi'}.`;
-	}
-
-	// Eger herhangi bir islem yapilamamissa bu file id'nin yanlis
-	// oldugunu belirtiyor ve hata mesaji donuluyor.
-	return `${fileID}, ID numarasi ile tanimlanmis bir dosya bulunmuyor`;
+	// Islemin tamamlandigina dair mesaji donuluyor
+	return `${fileID} ID numarali dosya, ${
+		folders[destFolderIndex].id
+	} ID numarali klasore ${type === 'move' ? 'tasindi' : 'kopyalandi'}.`;
 }
 
 // TODO: move fonksiyonu, girilen dosyayi girilen klasore tasiyacak
 function move(fileID, folderID) {
 	return moveOrCopyFile('move', fileID, folderID);
 }
-console.log(move(17, 5));
 
 // TODO: copy fonksiyonu, girilen dosyayi girilen klasore kopyalayacak
 function copy(fileID, folderID) {
 	return moveOrCopyFile('copy', fileID, folderID);
 }
-console.log(copy(17, 5));
 
 // TODO: remove fonksiyonu, girilen dosyayi silecek.
 function remove(fileID) {
+	// Degiskenler tanimlaniyor ve indeksler aliniyor.
+	const { parentFolderIndex, fileIndex } =
+		utils.getParentFolderAndFileIndex(fileID);
+
 	// Dogru ID kontrolu yapiliyor
-	if (typeof fileID !== 'number') return 'FileID giriniz';
+	if (fileIndex === -1) return 'Verilen dosya ID numarasi hatali';
 
-	// Silenecek dosyanin bulundugu klasorun indeksi bulunuyor
-	const folderIndex = findFolderIndex(fileID);
+	// Dosya splice ile klasorden siliniyor
+	folders[parentFolderIndex].files.splice(fileIndex, 1);
 
-	// Klasor indeksi -1 degilse islem yapiliyor
-	if (folderIndex !== -1) {
-		// Dosya indeksi aliniyor
-		const fileIndex = findFileIndex(folderIndex, fileID);
-
-		// Dosya splice ile klasorden siliniyor
-		folders[folderIndex].files.splice(fileIndex, 1);
-
-		// Islemin tamamlandigina dair mesaji donuluyor
-		return `${fileID} ID numarali dosya silinmistir.`;
-	}
-
-	// Klasor indeksi -1 donerse hata mesaji donuluyor
-	return `${fileID} ID numarasi ile tanimlanmis bir dosya bulunmuyor`;
+	// Islemin tamamlandigina dair mesaji donuluyor
+	return `${fileID} ID numarali dosya silinmistir.`;
 }
-console.log(remove(17));
 
 // TODO: removeFolder fonksiyonu, girilen klasoru butun icerigiyle silecek.
 function removeFolder(folderID) {
+	// Degisken tanimlaniyor ve indeks aliniyor.
+	const folderIndex = utils.getFolderIndex(folderID);
+
 	// Dogru ID kontrolu yapiliyor
-	if (typeof folderID !== 'number') return 'FolderID giriniz';
+	if (folderIndex === -1) return 'Verilen klasor ID numarasi hatali';
 
-	// Silinecek klasorun indeksi aliniyor
-	const folderIndex = folders.findIndex((item) => item.id === folderID);
+	// Klasor siliniyor
+	folders.splice(folderIndex, 1);
 
-	// Klasor indeksi -1 degilse klasor siliniyor
-	if (folderIndex !== -1) {
-		// Klasor siliniyor
-		folders.splice(folderIndex, 1);
-
-		// Islemin tamamlandigina dair mesaji donuluyor
-		return `${folderID}, ID numarali klasor silindi.`;
-	}
-
-	// Klasor indeksi -1 donerse hata mesaji donuluyor
-	return `${folderID}, ID numarasi ile tanimlanmis bir klasor bulunmuyor`;
+	// Islemin tamamlandigina dair mesaji donuluyor
+	return `${folderID}, ID numarali klasor silindi.`;
 }
-console.log(removeFolder(6));
 
 // TODO: parentFolderOf fonksiyonu, girilen dosyanin icerisinde bulundugu klasorun id'sini donecek.
 function parentFolderOf(fileID) {
+	// Degiskenler tanimlaniyor ve indeksler aliniyor.
+	const { parentFolderIndex, fileIndex } =
+		utils.getParentFolderAndFileIndex(fileID);
+
 	// Dogru ID kontrolu yapiliyor
-	if (typeof fileID !== 'number') return 'FileID giriniz';
+	if (fileIndex === -1) return 'Verilen dosya ID numarasi hatali';
 
-	// Dosyanin icerisinde oldugu klasorun indeksi aliniyor
-	const folderIndex = findFolderIndex(fileID);
-
-	// Klasor indeksi -1 degilse klasorun id'si donuluyor
-	if (folderIndex !== -1) return folders[folderIndex]['id'];
-
-	// Klasor indeksi -1 donerse hata mesaji donuluyor
-	return `${fileID}, ID numarasi ile tanimlanmis bir dosya bulunmuyor`;
+	// Klasor id'si donuluyor
+	return `Klasor ID: ${folders[parentFolderIndex]['id']}`;
 }
-console.log(parentFolderOf(17));
+
+// Fonksiyon Cagrilari
+// console.log(move(17, 7));
+// console.log(copy(17, 6));
+// console.log(remove(17));
+// console.log(removeFolder(6));
+// console.log(parentFolderOf(17));
