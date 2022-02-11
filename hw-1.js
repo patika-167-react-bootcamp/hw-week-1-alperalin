@@ -56,7 +56,7 @@ function moveOrCopyFile(type = 'move', fileID, folderID) {
 	if (fileIndex === -1 || destFolderIndex === -1)
 		return 'Verilen dosya veya klasor ID numarasi hatali';
 
-	// Mevcut klasor ile Tasima/kopyalama yapilacak klasor ayniysa hata mesaji donuluyor
+	// Ebeveyn klasor ile Tasima/kopyalama yapilacak klasor ayniysa hata mesaji donuluyor
 	if (parentFolderIndex === destFolderIndex)
 		return 'Ayni klasor icerisinde islem yapilamaz';
 
