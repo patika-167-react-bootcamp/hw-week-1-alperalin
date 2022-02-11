@@ -25,7 +25,7 @@ const folders = [
 
 // Ortak kullanilan fonksiyonlar bir Object altina toplandi.
 const utils = {
-	// Verilen ID uzerinden klasorun indeksini doner.
+	// Verilen klasor ID'si uzerinden klasorun indeksini doner.
 	getFolderIndex: (folderID) => {
 		return folders.findIndex((item) => item.id === folderID);
 	},
@@ -54,7 +54,7 @@ function moveOrCopyFile(type = 'move', fileID, folderID) {
 
 	// Dogru ID kontrolu yapiliyor
 	if (fileIndex === -1 || destFolderIndex === -1)
-		return 'Verilen ID numaralari hatali';
+		return 'Verilen dosya veya klasor ID numarasi hatali';
 
 	// Mevcut klasor ile Tasima/kopyalama yapilacak klasor ayniysa hata mesaji donuluyor
 	if (parentFolderIndex === destFolderIndex)
